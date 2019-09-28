@@ -3,7 +3,7 @@ import glob
 import time
 from RPLCD import CharLCD
 
-lcd = CharLCD(cols=16, rows=2, pin_rs=37, pin_e=35, pins_data=[33, 31, 29, 23])
+lcd = CharLCD(cols=16, rows=2, pin_rs=38, pin_e=40, pins_data=[31, 33, 35, 37])
 
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
