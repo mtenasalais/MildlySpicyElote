@@ -1,7 +1,7 @@
 import os
 import glob
 import time
-from RPLCD import CharLCD
+from RPLCD.gpio import CharLCD
 
 lcd = CharLCD(cols=16, rows=2, pin_rs=38, pin_e=40, pins_data=[31, 33, 35, 37])
 
