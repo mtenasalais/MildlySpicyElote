@@ -1,10 +1,7 @@
 import os
 import glob
 import time
-from RPLCD.gpio import CharLCD
-
-lcd = CharLCD(cols=16, rows=2, pin_rs=38, pin_e=40, pins_data=[31, 33, 35, 37])
-
+from datetime import datetime
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
 
@@ -32,5 +29,5 @@ def read_temp_c():
         return temp_c
 
 while True:
-    lcd.cursor_pos = (0, 0)
-    lcd.write_string("Temp: " + read_temp_c() + chr(223) + "C")
+	print(read_temp_c())
+	print(datetime.utcnow())
