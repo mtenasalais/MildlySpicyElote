@@ -1,0 +1,23 @@
+{
+  "name": "mildlyspicyelote",
+  "version": "1.0.0",
+  "description": "Temperature sensor.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtenasalais/MildlySpicyElote.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mtenasalais/MildlySpicyElote/issues"
+  },
+  "homepage": "https://github.com/mtenasalais/MildlySpicyElote#readme",
+  "dependencies": {
+    "lcd": "^3.0.0",
+    "npm": "^6.11.3"
+  }
+}
