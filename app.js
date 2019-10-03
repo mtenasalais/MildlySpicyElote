@@ -126,7 +126,7 @@ setInterval(() => {
           if (state.lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
         }
       } else {
-        turnLcdOff(lcd_power, state);
+        my_lcd = turnLcdOff(lcd_power, state);
         postRequest(CODE.SENSOR_ERROR, null);
         if (state.lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
         console.log("Sensor Error: Error reading sensor.");
