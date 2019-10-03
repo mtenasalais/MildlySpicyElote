@@ -2,14 +2,15 @@ const request = require("request");
 const sensor = require('ds18x20');
 
 const Lcd = require('lcd');
-const lcd = new Lcd( {rs: 12, e: 21, data: [5,6,17,18], cols: 16, rows: 2});
+const lcd = new Lcd({ rs: 25, e: 24, data: [23, 17, 18, 22], cols: 16, rows: 2 });
 
-var isLoaded = sensor.isDriverLoaded();
+let isLoaded = sensor.isDriverLoaded();
+let mainSensor;
 console.log(isLoaded);
 
 if (isLoaded) {
   //get sensors
-  var listOfDeviceIds = sensor.list();
+  let listOfDeviceIds = sensor.list();
   console.log('Devices found: ' + listOfDeviceIds);
   
   if(listOfDeviceIds.length==0){
@@ -18,17 +19,19 @@ if (isLoaded) {
   }
   
   //read the first sensor
-  var mainSensor = listOfDeviceIds[0];
-  sensor.get(mainSensor, function (err, temp) {
+  mainSensor = listOfDeviceIds.find(device => /^28*/);
+  if (mainSensor === undefined) {
+    console.log("28-xxxx device not found!");
+  }
+  sensor.get(mainSensor, (err, temp) => {
     console.log('Temp: ' + temp);
-  });
-
+  }); 
 
 } else {
   console.log('Driver not loaded!!');
 }
 
-function sendPost(code, temp) {
+const sendPost = (code, temp) => {
   request({
     url: "http://50.83.157.247/api",
     method: "POST",
@@ -42,48 +45,32 @@ function sendPost(code, temp) {
     },
     body: `{"query":"mutation {addTempDataPoint(code:${code},temperature:${temp}){temperature}}"}`
   });
-  console.log(temp+' '+code);
+  console.log(`code: ${code}, temp: ${temp}`);
 }
 
 
-lcd.on('ready', _ => {
-	setInterval(() => {
-		try {
-			
-			sensor.get(mainSensor, function (err, temp) {
-				if(temp == undefined){
-					//sendPost(0,temp)
-					console.log(12);
-					lcd.setCursor(0,0);
-					lcd.print(new Date().toString().substring(16,24), err => {
-						if(err) {
-							throw err;
-						}
-					});
-	
-				}
-				else{
-					//sendPost(0,40)
-					console.log(12);
-					lcd.setCursor(0,0);
-					lcd.print(new Date().toString().substring(16,24), err => {
-						if(err) {
-							throw err;
-						}
-					});
-				}
-				
-			});
-		
-		}
-		catch(error) {
-			sendPost(1,'null')
- 	
-		}
-	}, 500);
+lcd.on('ready', () => {
+  setInterval(() => {
+    try {
+      sensor.get(mainSensor, (err, temp) => {
+        if (temp === 0) {
+          sendPost(1,null);
+          lcd.setCursor(0,0);
+          lcd.print("  Sensor Error  ");
+        } else {
+          sendPost(0,Number(temp));
+          lcd.setCursor(0,0);
+          lcd.print(`${Number(temp).toFixed(2)} C`);
+        }
+      });
+    } catch(error) {
+      console.log(error);
+      sendPost(1,'null');
+    }
+  }, 500);
 });
 
-process.on('SIGINT', _ => {
-	lcd.close();
-	process.exit();
+process.on('SIGINT', () => {
+  lcd.close();
+  process.exit();
 });
