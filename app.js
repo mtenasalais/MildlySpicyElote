@@ -111,6 +111,7 @@ setInterval(() => {
           if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
           console.log(`Sensor Error: Sensor value at 85`);
         } else {
+          lcd_power.write(1);
           postRequest(CODE.NO_ERRORS, temp);
           if (lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
         }
