@@ -72,26 +72,38 @@ const writeToLcd = (the_lcd, code, temp) => {
     }
   });
 };
+
+// 4 - turnLcdOn
+const turnLcdOn = (lcd_power, state) => {
+  lcd_power.write(1);
+  const my_lcd = new lcd({
+    rs: 25,
+    e: 24,
+    data: [23, 17, 18, 22],
+    cols: 16,
+    rows: 2
+  });
+  my_lcd.on("ready", () => {
+    state.lcd_on = true;
+  });
+  return my_lcd;
+};
+
+// 5 - turnLcdOff
+const turnLcdOff = (lcd_power, state) => {
+  lcd_power.write(0);
+  state.lcd_on = false;
+};
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // create gpio pins
 const lcd_power = new Gpio(26, "out");
 
 // create my_lcd
-lcd_power.write(1);
-const my_lcd = new lcd({
-  rs: 25,
-  e: 24,
-  data: [23, 17, 18, 22],
-  cols: 16,
-  rows: 2
-});
+let my_lcd = turnLcdOn(lcd_power);
 
 // listeners
-let lcd_on = false;
-my_lcd.on("ready", () => {
-  lcd_on = true;
-});
+let state = { lcd_on: false };
 
 // main loop
 const DEFAULT_TEMP = 0;
@@ -102,29 +114,29 @@ setInterval(() => {
       if (temp) {
         if (temp === DEFAULT_TEMP) {
           postRequest(CODE.SENSOR_ERROR, null);
-          if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+          if (state.lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
           console.log(
             `Sensor Error: Sensor value at DEFAULT_TEMP: ${DEFAULT_TEMP}`
           );
         } else if (temp === 85) {
           postRequest(CODE.SENSOR_ERROR, null);
-          if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+          if (state.lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
           console.log(`Sensor Error: Sensor value at 85`);
         } else {
-          lcd_power.write(1);
+          my_lcd = turnLcdOn(lcd_power, state);
           postRequest(CODE.NO_ERRORS, temp);
-          if (lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
+          if (state.lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
         }
       } else {
-        lcd_power.write(0);
+        turnLcdOff(lcd_power, state);
         postRequest(CODE.SENSOR_ERROR, null);
-        if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+        if (state.lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
         console.log("Sensor Error: Error reading sensor.");
       }
     });
   } catch (e) {
     postRequest(CODE.SENSOR_ERROR, null);
-    if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+    if (state.lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
     console.log(error);
   }
 }, INTERVAL_MS);
