@@ -82,14 +82,13 @@ const my_lcd = new lcd({
   rows: 2
 });
 
-//////////////////////////////
 // listeners
 let lcd_on = false;
 my_lcd.on("ready", () => {
   lcd_on = true;
 });
-//////////////////////////////
 
+// main loop
 const DEFAULT_TEMP = 0;
 const INTERVAL_MS = 500;
 setInterval(() => {
