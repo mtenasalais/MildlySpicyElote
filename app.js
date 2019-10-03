@@ -1,6 +1,7 @@
 const request = require("request");
 const sensor = require("ds18x20");
 const lcd = require("lcd");
+const Gpio = require("onoff").Gpio;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // define constants
@@ -74,6 +75,7 @@ const writeToLcd = (the_lcd, code, temp) => {
 /////////////////////////////////////////////////////////////////////////////////////////
 
 // create my_lcd
+lcd_power.write(1);
 const my_lcd = new lcd({
   rs: 25,
   e: 24,
@@ -81,6 +83,9 @@ const my_lcd = new lcd({
   cols: 16,
   rows: 2
 });
+
+// create gpio pins
+const lcd_power = new Gpio(26, "out");
 
 // listeners
 let lcd_on = false;
@@ -106,6 +111,7 @@ setInterval(() => {
           if (lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
         }
       } else {
+        lcd_power.write(0);
         postRequest(CODE.SENSOR_ERROR, null);
         if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
         console.log("Sensor Error: Error reading sensor.");
