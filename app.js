@@ -87,6 +87,8 @@ my_lcd.on("ready", () => {
 // on ^C
 const SIGINT = "SIGINT";
 process.on(SIGINT, () => {
-  my_lcd.close();
-  process.exit();
+  my_lcd.clear(() => {
+    my_lcd.close();
+    process.exit();
+  });
 });
