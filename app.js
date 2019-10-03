@@ -100,10 +100,8 @@ const turnLcdOff = (lcd_power, state) => {
 const lcd_power = new Gpio(26, "out");
 
 // create my_lcd
-let my_lcd = turnLcdOn(lcd_power);
-
-// listeners
 let state = { lcd_on: false };
+let my_lcd = turnLcdOn(lcd_power);
 
 // main loop
 const DEFAULT_TEMP = 0;
