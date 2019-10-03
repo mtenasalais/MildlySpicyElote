@@ -60,25 +60,35 @@ const getSensorName = () => {
   }
 };
 
+const current = {
+  code: CODE.SENSOR_ERROR,
+  temp: null
+};
+
 // main loop
 const INTERVAL_MS = 500;
 const DEFAULT_TEMP = 0;
+console.log(my_lcd);
 my_lcd.on("ready", () => {
+  console.log(my_lcd);
   setInterval(() => {
     try {
       sensor.get(getSensorName(), (err, temp) => {
         if (temp === DEFAULT_TEMP) {
           postRequest(CODE.SENSOR_ERROR, null);
+          // current = { code: CODE.SENSOR_ERROR, temp: null };
           my_lcd.setCursor(0, 0);
           my_lcd.print("  Sensor Error  ");
         } else {
           postRequest(CODE.NO_ERRORS, Number(temp));
+          // current = { code: CODE.NO_ERRORS, temp };
           my_lcd.setCursor(0, 0);
           my_lcd.print(`${Number(temp).toFixed(2)} C`);
         }
       });
     } catch (e) {
       console.log(error);
+      // current = { code: CODE.SENSOR_ERROR, temp: null };
       postRequest(CODE.SENSOR_ERROR, null);
     }
   }, INTERVAL_MS);
