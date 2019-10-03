@@ -74,6 +74,9 @@ const writeToLcd = (the_lcd, code, temp) => {
 };
 /////////////////////////////////////////////////////////////////////////////////////////
 
+// create gpio pins
+const lcd_power = new Gpio(26, "out");
+
 // create my_lcd
 lcd_power.write(1);
 const my_lcd = new lcd({
@@ -83,9 +86,6 @@ const my_lcd = new lcd({
   cols: 16,
   rows: 2
 });
-
-// create gpio pins
-const lcd_power = new Gpio(26, "out");
 
 // listeners
 let lcd_on = false;
