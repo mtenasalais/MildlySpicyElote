@@ -2,6 +2,18 @@ const request = require("request");
 const sensor = require("ds18x20");
 const lcd = require("lcd");
 
+/////////////////////////////////////////////////////////////////////////////////////////
+// define constants
+const CODE = {
+  NO_ERRORS: 0,
+  SENSOR_ERROR: 1
+};
+/////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// Define helper functions
+
+// 1 - postRequest
 const API_ENDPOINT = "http://50.83.157.247/api";
 const HTTP_METHOD = "POST";
 const HEADERS = {
@@ -13,11 +25,6 @@ const HEADERS = {
   Origin: API_ENDPOINT
 };
 
-// send data to server
-const CODE = {
-  NO_ERRORS: 0,
-  SENSOR_ERROR: 1
-};
 const postRequest = (code, temp) => {
   request({
     url: API_ENDPOINT,
@@ -27,15 +34,7 @@ const postRequest = (code, temp) => {
   });
 };
 
-// create my_lcd
-const my_lcd = new lcd({
-  rs: 25,
-  e: 24,
-  data: [23, 17, 18, 22],
-  cols: 16,
-  rows: 2
-});
-
+// 2 - getSensorName
 const getSensorName = () => {
   if (sensor.isDriverLoaded()) {
     // get device list
@@ -60,39 +59,63 @@ const getSensorName = () => {
   }
 };
 
-const current = {
-  code: CODE.SENSOR_ERROR,
-  temp: null
+// 3 - writeToLcd
+const writeToLcd = (the_lcd, code, temp) => {
+  if (code === CODE.SENSOR_ERROR) {
+    the_lcd.setCursor(0, 0);
+    the_lcd.print("  Sensor Error  ");
+  } else {
+    the_lcd.setCursor(0, 0);
+    the_lcd.print(`${Number(temp).toFixed(2)} C`);
+  }
 };
+/////////////////////////////////////////////////////////////////////////////////////////
 
-// main loop
-const INTERVAL_MS = 500;
-const DEFAULT_TEMP = 0;
-console.log(my_lcd);
+// create my_lcd
+const my_lcd = new lcd({
+  rs: 25,
+  e: 24,
+  data: [23, 17, 18, 22],
+  cols: 16,
+  rows: 2
+});
+
+//////////////////////////////
+// listeners
+let lcd_on = false;
 my_lcd.on("ready", () => {
-  console.log(my_lcd);
-  setInterval(() => {
-    try {
-      sensor.get(getSensorName(), (err, temp) => {
+  lcd_on = true;
+});
+//////////////////////////////
+
+const DEFAULT_TEMP = 0;
+const INTERVAL_MS = 500;
+setInterval(() => {
+  try {
+    sensor.get(getSensorName(), (err, temp) => {
+      if (temp) {
         if (temp === DEFAULT_TEMP) {
           postRequest(CODE.SENSOR_ERROR, null);
-          // current = { code: CODE.SENSOR_ERROR, temp: null };
-          my_lcd.setCursor(0, 0);
-          my_lcd.print("  Sensor Error  ");
+          if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+          console.log(
+            `Sensor Error: Sensor value at DEFAULT_TEMP: ${DEFAULT_TEMP}`
+          );
         } else {
-          postRequest(CODE.NO_ERRORS, Number(temp));
-          // current = { code: CODE.NO_ERRORS, temp };
-          my_lcd.setCursor(0, 0);
-          my_lcd.print(`${Number(temp).toFixed(2)} C`);
+          postRequest(CODE.NO_ERRORS, temp);
+          if (lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
         }
-      });
-    } catch (e) {
-      console.log(error);
-      // current = { code: CODE.SENSOR_ERROR, temp: null };
-      postRequest(CODE.SENSOR_ERROR, null);
-    }
-  }, INTERVAL_MS);
-});
+      } else {
+        postRequest(CODE.SENSOR_ERROR, Number(temp));
+        if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+        console.log("Sensor Error: Error reading sensor.");
+      }
+    });
+  } catch (e) {
+    postRequest(CODE.SENSOR_ERROR, null);
+    if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+    console.log(error);
+  }
+}, INTERVAL_MS);
 
 // on ^C
 const SIGINT = "SIGINT";
