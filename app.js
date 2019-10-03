@@ -106,6 +106,10 @@ setInterval(() => {
           console.log(
             `Sensor Error: Sensor value at DEFAULT_TEMP: ${DEFAULT_TEMP}`
           );
+        } else if (temp === 85) {
+          postRequest(CODE.SENSOR_ERROR, null);
+          if (lcd_on) writeToLcd(my_lcd, CODE.SENSOR_ERROR, null);
+          console.log(`Sensor Error: Sensor value at 85`);
         } else {
           postRequest(CODE.NO_ERRORS, temp);
           if (lcd_on) writeToLcd(my_lcd, CODE.NO_ERRORS, temp);
