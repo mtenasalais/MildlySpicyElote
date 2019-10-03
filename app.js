@@ -61,13 +61,15 @@ const getSensorName = () => {
 
 // 3 - writeToLcd
 const writeToLcd = (the_lcd, code, temp) => {
-  if (code === CODE.SENSOR_ERROR) {
-    the_lcd.setCursor(0, 0);
-    the_lcd.print("  Sensor Error  ");
-  } else {
-    the_lcd.setCursor(0, 0);
-    the_lcd.print(`${Number(temp).toFixed(2)} C`);
-  }
+  sensor.clear(() => {
+    if (code === CODE.SENSOR_ERROR) {
+      the_lcd.setCursor(0, 0);
+      the_lcd.print("  Sensor Error  ");
+    } else {
+      the_lcd.setCursor(0, 0);
+      the_lcd.print(`${Number(temp).toFixed(2)} C`);
+    }
+  });
 };
 /////////////////////////////////////////////////////////////////////////////////////////
 
